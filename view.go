@@ -93,7 +93,13 @@ func (e *ViewEngine) executeRender(out io.Writer, name string, data interface{})
 	if filepath.Ext(name) == e.config.Extension {
 		useMaster = false
 		name = strings.TrimSuffix(name, e.config.Extension)
-
+	}
+	if dataMap, ok := data.(map[string]interface{}); ok {
+		if layout, ok := dataMap["layout"].(string); ok {
+			if layout != "" {
+				useMaster = false
+			}
+		}
 	}
 	return e.executeTemplate(out, name, data, useMaster)
 }
@@ -119,9 +125,19 @@ func (e *ViewEngine) executeTemplate(out io.Writer, name string, data interface{
 	tpl, ok = e.tplMap[name]
 	e.tplMutex.RUnlock()
 
+	var customLayout string
 	exeName := name
+
 	if useMaster && e.config.Master != "" {
 		exeName = e.config.Master
+	} else {
+		if dataMap, ok := data.(map[string]interface{}); ok {
+			if customLayout, ok = dataMap["layout"].(string); ok {
+				if customLayout != "" {
+					exeName = customLayout
+				}
+			}
+		}
 	}
 
 	if !ok || e.config.DisableCache {
@@ -131,6 +147,8 @@ func (e *ViewEngine) executeTemplate(out io.Writer, name string, data interface{
 			if e.config.Master != "" {
 				tplList = append(tplList, e.config.Master)
 			}
+		} else if customLayout != "" {
+			tplList = append(tplList, customLayout)
 		}
 		tplList = append(tplList, name)
 		tplList = append(tplList, e.config.Partials...)
