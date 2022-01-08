@@ -3,7 +3,7 @@ package echoview
 import (
 	"io"
 
-	"github.com/foolin/goview"
+	"github.com/tanvir-retailai/goview"
 	"github.com/labstack/echo"
 )
 
