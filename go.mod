@@ -1,4 +1,4 @@
-module github.com/foolin/goview
+module github.com/tanvir-retailai/goview
 
 go 1.14
 
